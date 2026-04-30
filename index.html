@@ -58,8 +58,8 @@ label {
     border-radius:10px;
 }
 .btn-primary { background:#fff; color:#473787; }
-.btn-success { background:#6c5ce7; }
-.btn-dark { background:#2d2a55; }
+.btn-success { background:#c73f15; }
+.btn-dark { background:#2e6695; }
 
 .spinner-overlay {
     position:fixed;
@@ -117,15 +117,36 @@ label {
 
 <!-- LOGIN -->
 <div class="center-box" id="loginBox">
-<div class="card">
-<h4 class="text-center mb-3">🔐 Login</h4>
+  <div class="card p-4 shadow" style="width: 350px;">
 
-<input id="username" class="form-control mb-2" placeholder="Username">
-<input id="password" type="password" class="form-control mb-3" placeholder="Password">
+    <!-- Round Logo -->
+    <img src="https://raw.githubusercontent.com/dwsbspautomation2023-alt/dws/main/dwslogo.png"
+         style="width:100px; height:100px; object-fit:cover; 
+                border-radius:50%; display:block; margin:auto; border:2px solid #ddd;">
 
-<button class="btn btn-dark w-100" onclick="login()">Login</button>
-<div id="loginMsg" class="text-center mt-2"></div>
-</div>
+    <h5 class="text-center mt-2 mb-3">DIGITAL WEIGHING SYSTEMS</h5>
+
+    <h4 class="text-center mb-3">🔐 Login</h4>
+
+    <!-- USERNAME -->
+    <div class="mb-3">
+      <label>Username</label>
+      <input id="username" type="text" class="form-control" placeholder="Enter username">
+    </div>
+
+    <!-- PASSWORD -->
+    <div class="mb-3">
+      <label>Password</label>
+      <input id="password" type="password" class="form-control" placeholder="Enter password">
+    </div>
+
+    <!-- BUTTON -->
+    <button class="btn btn-dark w-100" onclick="login()">Login</button>
+
+    <!-- MESSAGE -->
+    <div id="loginMsg" class="text-center mt-2 text-danger"></div>
+
+  </div>
 </div>
 
 <!-- FORM -->
@@ -133,11 +154,14 @@ label {
 <div class="card">
 
 <div class="d-flex justify-content-between mb-2">
-<small>👤 <b id="showUser"></b></small>
+<small><span style="color:#ffc107;">👤</span> <b id="showUser"></b></small>
 <button class="btn btn-sm btn-light" onclick="openReport()">📊 Report</button>
+<button class="btn btn-sm btn-danger" onclick="logout()">👤 Logout</button>
 </div>
 
-<h5 class="text-center mb-3">📝 Attendance</h5>
+<h5 class="text-center mb-3">
+  <span style="color:#ffc107; font-size:18px;">👤</span> Employee Activity Portal
+</h5>
 
 <input id="empname" hidden>
 <input id="chatid" hidden>
@@ -195,6 +219,10 @@ let currentUser = "";
 
 /* LOGIN */
 function login(){
+    if(username.value.trim()=="" || password.value.trim()==""){
+    Swal.fire("Error","Username aur Password blank nahi ho sakta","warning");
+    return; // ❌ yahin pe stop ho jayega
+}
 loader.style.display="flex";
 
 fetch(apiUrl+"?action=login",{
@@ -278,11 +306,28 @@ type.value="";
 reason.value="";
 });
 }
+function logout(){
+    Swal.fire({
+        title: 'Logout?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Logout'
+    }).then((result) => {
+        if(result.isConfirmed){
+            loginBox.style.display="flex";
+            formBox.style.display="none";
+            reportBox.style.display="none";
+        }
+    });
+}
 
 /* REPORT */
 function openReport(){
-formBox.style.display="none";
-reportBox.style.display="flex";
+    formBox.style.display="none";
+    reportBox.style.display="flex";
+    let today = new Date().toISOString().split('T')[0];
+    r_from.value = today;
+    r_to.value = today;
 }
 
 function backToForm(){
