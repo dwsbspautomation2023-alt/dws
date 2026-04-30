@@ -306,7 +306,13 @@ Swal.fire("Late Over","Only 2 Late allowed","error");
 return;
 }
 
-msg.innerHTML="✅ Saved";
+Swal.fire({
+    title: "Saved!",
+    text: "Your request has been submitted successfully",
+    icon: "success",
+    confirmButtonColor: "#473787"
+});
+
 type.value="";
 reason.value="";
 });
