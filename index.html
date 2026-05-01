@@ -259,30 +259,61 @@ loginMsg.innerHTML="❌ Invalid Login";
 }
 
 /* TYPE CHANGE */
-type.addEventListener("change", function(){
-let today=new Date().toISOString().split('T')[0];
+// type.addEventListener("change", function(){
+// let today=new Date().toISOString().split('T')[0];
 
-if(type.value==="Leave"){
-fromBox.style.display="block";
-fromdate.disabled=false;
-todate.disabled=false;
-}else{
-fromBox.style.display="none";
-todate.value=today;
-fromdate.value=today;
-todate.disabled=true;
-fromdate.disabled=true;
+// if(type.value==="Leave"){
+// fromBox.style.display="block";
+// fromdate.disabled=false;
+// todate.disabled=false;
+// }else{
+// fromBox.style.display="none";
+// todate.value=today;
+// fromdate.value=today;
+// todate.disabled=true;
+// fromdate.disabled=true;
+// }
+// });
+/* TYPE CHANGE (FIXED: Leave + Tour range) */
+type.addEventListener("change", function(){
+
+let today = new Date().toISOString().split('T')[0];
+
+if(type.value==="Leave" || type.value==="Tour"){
+    fromBox.style.display="block";
+    fromdate.disabled=false;
+    todate.disabled=false;
+}
+else{
+    fromBox.style.display="none";
+    todate.value=today;
+    fromdate.value=today;
+    todate.disabled=true;
+    fromdate.disabled=true;
 }
 });
 
 /* SEND */
 function sendData(){
+
 if(type.value==""||reason.value==""){
 msg.innerHTML="⚠ Fill all";
 return;
 }
 
-let fdate=(type.value==="Leave")?fromdate.value:todate.value;
+let from = "";
+let to = "";
+
+// ✅ Leave & Tour → range
+if(type.value === "Leave" || type.value === "Tour"){
+    from = fromdate.value;
+    to = todate.value;
+}
+// ❗ others → single date
+else{
+    from = todate.value;
+    to = todate.value;
+}
 
 loader.style.display="flex";
 
@@ -293,8 +324,8 @@ EmpidName:empname.value,
 ChatID:chatid.value,
 Type:type.value,
 Reason:reason.value,
-FromDate:fdate,
-ToDate:todate.value
+FromDate:from,
+ToDate:to
 }])
 })
 .then(res=>res.json())
@@ -333,12 +364,24 @@ function logout(){
 }
 
 /* REPORT */
+// function openReport(){
+//     formBox.style.display="none";
+//     reportBox.style.display="flex";
+//     let today = new Date().toISOString().split('T')[0];
+//     r_from.value = today;
+//     r_to.value = today;
+// }
 function openReport(){
     formBox.style.display="none";
     reportBox.style.display="flex";
+
     let today = new Date().toISOString().split('T')[0];
     r_from.value = today;
     r_to.value = today;
+
+    // 🔥 clear old report instantly
+    reportData.innerHTML = "";
+    summary.innerHTML = "";
 }
 
 function backToForm(){
@@ -367,48 +410,200 @@ toDate:r_to.value
 })
 })
 .then(res=>res.json())
-.then(data=>{
+.then(res=>{
 loader.style.display="none";
 
-let late=0,leave=0,tour=0,half=0;
+// ================= DATA =================
+let allData = res.data || [];
+let s = res.summary || {};
 
-data.forEach(r=>{
-if(r.Type==="Late") late++;
-if(r.Type==="Leave") leave++;
-if(r.Type==="Tour") tour++;
-if(r.Type==="HalfDay") half++;
+// ================= DATE RANGE =================
+let start = new Date(r_from.value);
+let end = new Date(r_to.value);
+
+// normalize (IMPORTANT FIX)
+start.setHours(0,0,0,0);
+end.setHours(23,59,59,999);
+
+// ================= FILTERED DATA (TABLE ONLY) =================
+let filtered = allData.filter(r => {
+
+    let from = new Date(r.FromDate);
+    let to = new Date(r.ToDate);
+
+    if(isNaN(from) || isNaN(to)) return false;
+
+    from.setHours(0,0,0,0);
+    to.setHours(0,0,0,0);
+
+    // 🔥 PERFECT OVERLAP LOGIC (FIXED)
+    return !(to < start || from > end);
 });
 
-summary.innerHTML=`
+// ================= COUNTERS =================
+let late=0, leave=0, tour=0, half=0;
+
+filtered.forEach(r=>{
+
+let type = String(r.Type).trim().toLowerCase();
+
+// Late
+if(type === "late") late++;
+
+// Tour (FIXED)
+if(type === "tour"){
+    let f = new Date(r.FromDate);
+    let t = new Date(r.ToDate);
+
+    if(!isNaN(f) && !isNaN(t)){
+        tour += Math.ceil((t - f)/(1000*60*60*24)) + 1;
+    }
+}
+
+// HalfDay
+if(type === "halfday") half++;
+
+// Leave (date-wise)
+if(type === "leave"){
+    let f = new Date(r.FromDate);
+    let t = new Date(r.ToDate);
+
+    f.setHours(0,0,0,0);
+    t.setHours(0,0,0,0);
+
+    if(!isNaN(f) && !isNaN(t)){
+        leave += Math.ceil((t - f)/(1000*60*60*24)) + 1;
+    }
+}
+
+});
+
+// ================= TOTAL LEAVE =================
+let total = s.total || 30;
+
+// ================= FULL YEAR USED =================
+let used = 0;
+
+allData.forEach(r=>{
+
+let type = String(r.Type).trim().toLowerCase();
+
+if(type === "leave"){
+    let f = new Date(r.FromDate);
+    let t = new Date(r.ToDate);
+
+    if(!isNaN(f) && !isNaN(t)){
+        used += Math.ceil((t - f)/(1000*60*60*24)) + 1;
+    }
+}
+
+if(type === "halfday"){
+    used += 0.5;
+}
+
+});
+
+let balance = total - used;
+if(balance < 0) balance = 0;
+
+// ================= SUMMARY =================
+summary.innerHTML = `
+<span class="badge bg-success">Total Leave: ${total}</span>
 <span class="badge bg-danger">Late: ${late}</span>
 <span class="badge bg-primary">Leave: ${leave}</span>
-<span class="badge bg-success">Tour: ${tour}</span>
 <span class="badge bg-warning text-dark">HalfDay: ${half}</span>
+<span class="badge bg-info text-dark">Tour: ${tour}</span>
+<span class="badge bg-secondary">Leave Used: ${used}</span>
+<span class="badge bg-dark">Leave Bal.: ${balance}</span>
 `;
 
-let html="<div class='table-container'><table class='table table-bordered'>";
-html+="<thead><tr><th>Type</th><th>Reason</th><th>From</th><th>To</th></tr></thead><tbody>";
+// ================= TABLE =================
+let html = "<div class='table-container'><table class='table table-bordered'>";
 
-data.forEach(r=>{
-html+=`<tr>
+html += `
+<thead>
+<tr>
+<th>Type</th>
+<th>Reason</th>
+<th>From</th>
+<th>To</th>
+<th>No of Days</th>
+</tr>
+</thead>
+<tbody>
+`;
+
+filtered.forEach(r=>{
+
+let type = String(r.Type).trim().toLowerCase();
+
+let days = 1;
+
+// ✅ Leave & Tour = DATE RANGE
+if(type === "leave" || type === "tour"){
+
+    let f = new Date(r.FromDate);
+    let t = new Date(r.ToDate);
+
+    if(!isNaN(f) && !isNaN(t)){
+        days = Math.ceil((t - f)/(1000*60*60*24)) + 1;
+    }
+}
+
+// ❗ HalfDay = 0.5
+else if(type === "halfday"){
+    days = 0.5;
+}
+
+html += `
+<tr>
 <td>${r.Type}</td>
 <td>${r.Reason}</td>
 <td>${formatDate(r.FromDate)}</td>
 <td>${formatDate(r.ToDate)}</td>
-</tr>`;
+<td><b>${days}</b></td>
+</tr>
+`;
 });
 
-html+="</tbody></table></div>";
-reportData.innerHTML=html;
+html += "</tbody></table></div>";
+
+reportData.innerHTML = html;
+
 });
 }
 
 /* DEFAULT */
-window.onload=()=>{
-let today=new Date().toISOString().split('T')[0];
-fromdate.value=today;
-todate.value=today;
-}
+// window.onload=()=>{
+// let today=new Date().toISOString().split('T')[0];
+// fromdate.value=today;
+// todate.value=today;
+// }
+window.onload = () => {
+
+    let today = new Date().toISOString().split('T')[0];
+
+    // default dates
+    fromdate.value = today;
+    todate.value = today;
+
+    r_from.value = today;
+    r_to.value = today;
+
+    // ✅ RESET UI ON REFRESH
+    loginBox.style.display = "flex";
+    formBox.style.display = "none";
+    reportBox.style.display = "none";
+
+    reportData.innerHTML = "";
+    summary.innerHTML = "";
+
+    // reset user
+    currentUser = "";
+    empname.value = "";
+    chatid.value = "";
+    showUser.innerText = "";
+};
 
 /* SERVICE WORKER */
 if ('serviceWorker' in navigator) {
