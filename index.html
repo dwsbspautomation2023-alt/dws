@@ -193,6 +193,7 @@ label {
 <input id="todate" type="date" class="form-control mb-3">
 
 <button class="btn btn-primary w-100 mb-2" onclick="sendData()">Submit</button>
+<div id="locationText" class="text-center mt-2" style="font-size:12px; color:#ffc107;"></div>
 
 <div id="msg" class="text-center mt-2"></div>
 
@@ -219,63 +220,98 @@ label {
 </div>
 
 <script>
-
+let currentLat = "";
+let currentLng = "";
+let currentAddress = "";
 let apiUrl = "https://script.google.com/macros/s/AKfycbyXjTmIVt4CmKAh_KTx8ZDiQFsMsQ5-SSaqosODrzcxY9knQz-xfH3Vrhsu_g4JGEL4/exec";
 let currentUser = "";
 
 /* LOGIN */
 function login(){
+
     if(username.value.trim()=="" || password.value.trim()==""){
-    Swal.fire("Error","Username aur Password blank nahi ho sakta","warning");
-    return; // ❌ yahin pe stop ho jayega
+        Swal.fire("Error","Username aur Password blank nahi ho sakta","warning");
+        return;
+    }
+
+    if (!navigator.geolocation) {
+        Swal.fire("Error","Location not supported","error");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(pos){
+
+            let lat = pos.coords.latitude;
+            let lng = pos.coords.longitude;
+
+            // ⭐ ADDRESS FETCH
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+            .then(res=>res.json())
+            .then(loc=>{
+
+                let address = loc.display_name || "Unknown Location";
+
+                loader.style.display="flex";
+
+                fetch(apiUrl+"?action=login",{
+                    method:"POST",
+                    body:JSON.stringify({
+                        username:username.value,
+                        password:password.value,
+                        Latitude: lat,
+                        Longitude: lng,
+                        Address: address   // ⭐ send to backend
+                    })
+                })
+                .then(res=>res.json())
+                .then(res=>{
+                    loader.style.display="none";
+
+                    if(res.status==="success"){
+
+                        loginBox.style.display="none";
+                        formBox.style.display="flex";
+
+                        empname.value=res.name;
+                        chatid.value=res.chatId;
+
+                        currentUser=res.name;
+
+                        // ⭐ NAME + LOCATION SHOW
+                        showUser.innerText = res.name 
+
+                        Swal.fire("Welcome", res.name, "success");
+
+                    }else{
+                        loginMsg.innerHTML="❌ Invalid Login";
+                    }
+
+                });
+
+            });
+
+        },
+
+        function(err){
+
+            Swal.fire({
+                title: "Location Required",
+                text: "Login ke liye Location ON karna zaroori hai",
+                icon: "error",
+                confirmButtonText: "OK"
+            });
+
+        },
+
+        {
+            enableHighAccuracy: true,
+            timeout: 10000
+        }
+    );
 }
-loader.style.display="flex";
 
-fetch(apiUrl+"?action=login",{
-method:"POST",
-body:JSON.stringify({
-username:username.value,
-password:password.value
-})
-})
-.then(res=>res.json())
-.then(res=>{
-loader.style.display="none";
-
-if(res.status==="success"){
-loginBox.style.display="none";
-formBox.style.display="flex";
-
-empname.value=res.name;
-chatid.value=res.chatId;
-
-currentUser=res.name;
-showUser.innerText=res.name;
-
-Swal.fire("Welcome",res.name,"success");
-}else{
-loginMsg.innerHTML="❌ Invalid Login";
-}
-});
-}
-
-/* TYPE CHANGE */
-// type.addEventListener("change", function(){
-// let today=new Date().toISOString().split('T')[0];
-
-// if(type.value==="Leave"){
-// fromBox.style.display="block";
-// fromdate.disabled=false;
-// todate.disabled=false;
-// }else{
-// fromBox.style.display="none";
-// todate.value=today;
-// fromdate.value=today;
-// todate.disabled=true;
-// fromdate.disabled=true;
-// }
-// });
-/* TYPE CHANGE (FIXED: Leave + Tour range) */
 type.addEventListener("change", function(){
 
 let today = new Date().toISOString().split('T')[0];
@@ -311,24 +347,15 @@ else{
 
 });
 
-/* SEND */
-function sendData(){
 
-if(type.value==""||reason.value==""){
-msg.innerHTML="⚠ Fill all";
-return;
-}
+function submitFinal(){
 
-let from = "";
-let to = "";
+let from="", to="";
 
-// ✅ Leave & Tour → range
 if(type.value === "Leave" || type.value === "Tour"){
     from = fromdate.value;
     to = todate.value;
-}
-// ❗ others → single date
-else{
+}else{
     from = todate.value;
     to = todate.value;
 }
@@ -338,33 +365,110 @@ loader.style.display="flex";
 fetch(apiUrl,{
 method:"POST",
 body:JSON.stringify([{
-EmpidName:empname.value,
-ChatID:chatid.value,
-Type:type.value,
-Reason:reason.value,
-FromDate:from,
-ToDate:to
+    EmpidName:empname.value,
+    ChatID:chatid.value,
+    Type:type.value,
+    Reason:reason.value,
+    FromDate:from,
+    ToDate:to,
+
+    // ⭐ LOCATION (HAR TYPE KE LIYE)
+    Latitude: currentLat,
+    Longitude: currentLng,
+    Address: currentAddress
 }])
 })
 .then(res=>res.json())
 .then(res=>{
-loader.style.display="none";
+    loader.style.display="none";
 
-if(res.status==="blocked"){
-Swal.fire("Late Over","Only 2 Late allowed","error");
-return;
+    if(res.status==="blocked"){
+        Swal.fire("Late Over","Only 2 Late allowed","error");
+        return;
+    }
+
+    Swal.fire("Saved!","Data submitted","success");
+
+    type.value="";
+    reason.value="";
+});
+}
+function getLocation(){
+
+    if (!navigator.geolocation) {
+        locationText.innerHTML = "❌ Location not supported";
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(pos){
+
+            currentLat = pos.coords.latitude;
+            currentLng = pos.coords.longitude;
+
+            // ⭐ Address fetch
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLng}`)
+            .then(res=>res.json())
+            .then(loc=>{
+
+                currentAddress = loc.display_name || "Unknown";
+
+                // ⭐ UI me show karo
+                locationText.innerHTML = "📍 " + currentAddress;
+
+            });
+
+        },
+
+        function(err){
+            locationText.innerHTML = "❌ Location OFF hai";
+        },
+
+        {
+            enableHighAccuracy: true,
+            timeout: 10000
+        }
+    );
+}
+/* SEND */
+function sendData(){
+
+if(type.value==""||reason.value==""){
+    msg.innerHTML="⚠ Fill all";
+    return;
 }
 
-Swal.fire({
-    title: "Saved!",
-    text: "Your request has been submitted successfully",
-    icon: "success",
-    confirmButtonColor: "#473787"
-});
+// ⭐ STEP 1: GET LIVE LOCATION FIRST
+navigator.geolocation.getCurrentPosition(
 
-type.value="";
-reason.value="";
-});
+function(pos){
+
+    currentLat = pos.coords.latitude;
+    currentLng = pos.coords.longitude;
+
+    // ⭐ ADDRESS FETCH
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLng}`)
+    .then(res=>res.json())
+    .then(loc=>{
+
+        currentAddress = loc.display_name || "Unknown";
+
+        locationText.innerHTML = "📍 " + currentAddress;
+
+        // ⭐ STEP 2: NOW SEND DATA
+        submitFinal();
+
+    });
+
+},
+
+function(err){
+    Swal.fire("Error","Location ON karo","error");
+}
+
+);
+
 }
 function logout(){
     Swal.fire({
@@ -414,6 +518,7 @@ function formatDate(dt) {
     let year = d.getFullYear();
     return `${day}-${month}-${year}`;
 }
+
 
 function getReport(){
 loader.style.display="flex";
@@ -621,6 +726,7 @@ window.onload = () => {
     empname.value = "";
     chatid.value = "";
     showUser.innerText = "";
+    getLocation();
 };
 
 /* SERVICE WORKER */
