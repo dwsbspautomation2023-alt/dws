@@ -248,20 +248,34 @@ function login(){
         let lat = pos.coords.latitude;
         let lng = pos.coords.longitude;
 
+        // ❗ अगर lat/lng invalid
+        if(!lat || !lng){
+            loader.style.display="none";
+            Swal.fire("Error","Location not detected","error");
+            return;
+        }
+
         // ⭐ ADDRESS FETCH
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
         .then(res=>res.json())
         .then(loc=>{
 
-            let address = loc.display_name || "Unknown Location";
+            let address = loc.display_name;
 
-            // ✅ SAVE LOCATION (IMPORTANT)
+            // ❗ अगर address नहीं मिला → login रोक दो
+            if(!address){
+                loader.style.display="none";
+                Swal.fire("Error","Address not found, try again","error");
+                return;
+            }
+
+            // ✅ SAVE LOCATION (GLOBAL)
             currentLat = lat;
             currentLng = lng;
             currentAddress = address;
 
-            // ⭐ LOGIN API
-            fetch(apiUrl+"?action=login",{
+            // ⭐ LOGIN API CALL (ONLY NOW)
+            return fetch(apiUrl+"?action=login",{
                 method:"POST",
                 body:JSON.stringify({
                     username:username.value,
@@ -270,41 +284,44 @@ function login(){
                     Longitude: lng,
                     Address: address
                 })
-            })
-            .then(res=>res.json())
-            .then(res=>{
-
-                loader.style.display="none";
-
-                if(res.status==="success"){
-
-                    // ✅ SWITCH UI
-                    loginBox.style.display="none";
-                    formBox.style.display="flex";
-
-                    // ✅ USER DATA
-                    empname.value = res.name;
-                    chatid.value = res.chatId;
-                    currentUser = res.name;
-
-                    showUser.innerText = res.name;
-
-                    // ✅ LOCATION SHOW
-                    locationText.innerHTML = "📍 " + currentAddress;
-
-                    Swal.fire("Welcome", res.name, "success");
-
-                }else{
-                    loginMsg.innerHTML="❌ Invalid Login";
-                }
-
             });
 
+        })
+        .then(res=>res.json())
+        .then(res=>{
+
+            loader.style.display="none";
+
+            if(res.status==="success"){
+
+                loginBox.style.display="none";
+                formBox.style.display="flex";
+
+                empname.value = res.name;
+                chatid.value = res.chatId;
+                currentUser = res.name;
+
+                showUser.innerText = res.name;
+
+                // ✅ SHOW LOCATION
+                locationText.innerHTML = "📍 " + currentAddress;
+
+                Swal.fire("Welcome", res.name, "success");
+
+            }else{
+                loginMsg.innerHTML="❌ Invalid Login";
+            }
+
+        })
+        .catch(err=>{
+            loader.style.display="none";
+            Swal.fire("Error","Location fetch failed, try again","error");
         });
 
     },
 
     function(err){
+
         loader.style.display="none";
 
         Swal.fire({
@@ -312,6 +329,7 @@ function login(){
             text: "Login ke liye Location ON karna zaroori hai",
             icon: "error"
         });
+
     },
 
     {
