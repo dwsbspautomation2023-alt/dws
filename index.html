@@ -174,6 +174,7 @@ label {
 <label>Select Type</label>
 <select id="type" class="form-control mb-2">
 <option value="">Select Type</option>
+<option value="Preset">Site Engineer attendance</option>
 <option value="Leave">Leave</option>
 <option value="HalfDay">HalfDay</option>
 <option value="Tour">Tour</option>
@@ -279,18 +280,35 @@ type.addEventListener("change", function(){
 
 let today = new Date().toISOString().split('T')[0];
 
+// ✅ Leave + Tour → editable range
 if(type.value==="Leave" || type.value==="Tour"){
     fromBox.style.display="block";
     fromdate.disabled=false;
     todate.disabled=false;
 }
+
+// ✅ Preset → TODAY + LOCK
+else if(type.value==="Preset"){
+    fromBox.style.display="block";
+
+    fromdate.value = today;
+    todate.value = today;
+
+    fromdate.disabled = true;
+    todate.disabled = true;
+}
+
+// ❗ Late / HalfDay → single date auto
 else{
     fromBox.style.display="none";
-    todate.value=today;
-    fromdate.value=today;
-    todate.disabled=true;
-    fromdate.disabled=true;
+
+    fromdate.value = today;
+    todate.value = today;
+
+    fromdate.disabled = true;
+    todate.disabled = true;
 }
+
 });
 
 /* SEND */
@@ -508,12 +526,11 @@ if(balance < 0) balance = 0;
 
 // ================= SUMMARY =================
 summary.innerHTML = `
-
+<span class="badge bg-success">Total Leave: ${total}</span>
 <span class="badge bg-danger">Late: ${late}</span>
 <span class="badge bg-primary">Leave: ${leave}</span>
 <span class="badge bg-warning text-dark">HalfDay: ${half}</span>
 <span class="badge bg-info text-dark">Tour: ${tour}</span>
-<span class="badge bg-success">Total Leave: ${total}</span>
 <span class="badge bg-secondary">Leave Used: ${used}</span>
 <span class="badge bg-dark">Leave Bal.: ${balance}</span>
 `;
