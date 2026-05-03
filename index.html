@@ -225,7 +225,7 @@ let currentLng = "";
 let currentAddress = "";
 let apiUrl = "https://script.google.com/macros/s/AKfycbyXjTmIVt4CmKAh_KTx8ZDiQFsMsQ5-SSaqosODrzcxY9knQz-xfH3Vrhsu_g4JGEL4/exec";
 let currentUser = "";
-
+let userAddress = "";   // ⭐ ADD THIS
 /* LOGIN */
 function login(){
 
@@ -300,14 +300,14 @@ function login(){
                 empname.value = res.name;
                 chatid.value = res.chatId;
                 currentUser = res.name;
-
                 showUser.innerText = res.name;
-
+                userAddress = res.Address;   // ⭐ ADD THIS
+                filterDropdown();            // ⭐ ADD THIS
                 // ✅ SHOW LOCATION
                 locationText.innerHTML = "📍 " + currentAddress;
 
                 Swal.fire("Welcome", res.name, "success");
-
+               
             }else{
                 loginMsg.innerHTML="❌ Invalid Login";
             }
@@ -376,6 +376,44 @@ else{
 });
 
 
+function filterDropdown(){
+
+    // 🧹 reset dropdown
+    type.innerHTML = "";
+
+    // default option
+    type.innerHTML += `<option value="">Select Type</option>`;
+
+    // ⭐ S USER
+    if(userAddress === "S"){
+
+        type.innerHTML += `<option value="Preset">Site Engineer attendance</option>`;
+        type.innerHTML += `<option value="Leave">Leave</option>`;
+
+    }
+
+    // ⭐ H USER
+    else if(userAddress === "H"){
+
+        type.innerHTML += `<option value="Leave">Leave</option>`;
+        type.innerHTML += `<option value="HalfDay">HalfDay</option>`;
+        type.innerHTML += `<option value="Tour">Tour</option>`;
+        type.innerHTML += `<option value="Late">Late</option>`;
+
+    }
+
+    // ⭐ DEFAULT (agar koi aur value ho)
+    else{
+
+        type.innerHTML += `<option value="Preset">Site Engineer attendance</option>`;
+        type.innerHTML += `<option value="Leave">Leave</option>`;
+        type.innerHTML += `<option value="HalfDay">HalfDay</option>`;
+        type.innerHTML += `<option value="Tour">Tour</option>`;
+        type.innerHTML += `<option value="Late">Late</option>`;
+    }
+}
+
+
 function submitFinal(){
 
 let from="", to="";
@@ -395,7 +433,11 @@ method:"POST",
 body:JSON.stringify([{
     EmpidName:empname.value,
     ChatID:chatid.value,
-    Type:type.value,
+     // ⭐ FINAL LOGIC
+    Type:
+        (type.value === "Preset") ? "Present" :
+        (userAddress === "S" && type.value === "Leave") ? "SLeave" :
+        type.value,
     Reason:reason.value,
     FromDate:from,
     ToDate:to,
@@ -596,7 +638,7 @@ if(type === "tour"){
 if(type === "halfday") half++;
 
 // Leave (date-wise)
-if(type === "leave"){
+if(type === "leave" || type === "sleave"){
     let f = new Date(r.FromDate);
     let t = new Date(r.ToDate);
 
@@ -620,7 +662,7 @@ allData.forEach(r=>{
 
 let type = String(r.Type).trim().toLowerCase();
 
-if(type === "leave"){
+if(type === "leave" || type === "sleave"){
     let f = new Date(r.FromDate);
     let t = new Date(r.ToDate);
 
@@ -672,7 +714,7 @@ let type = String(r.Type).trim().toLowerCase();
 let days = 1;
 
 // ✅ Leave & Tour = DATE RANGE
-if(type === "leave" || type === "tour"){
+if(type === "leave" || type === "sleave" || type === "tour"){
 
     let f = new Date(r.FromDate);
     let t = new Date(r.ToDate);
@@ -689,7 +731,7 @@ else if(type === "halfday"){
 
 html += `
 <tr>
-<td>${r.Type}</td>
+<td>${r.Type === "SLeave" ? "Leave" : r.Type}</td>
 <td>${r.Reason}</td>
 <td>${formatDate(r.FromDate)}</td>
 <td>${formatDate(r.ToDate)}</td>
