@@ -234,58 +234,20 @@ function login(){
         return;
     }
 
-    if (!navigator.geolocation) {
-        Swal.fire("Error","Location not supported","error");
-        return;
-    }
-
     loader.style.display="flex";
 
-    navigator.geolocation.getCurrentPosition(
+    // 👉 Function jo actual login karega
+    function doLogin(lat=null, lng=null, address=""){
 
-    function(pos){
-
-        let lat = pos.coords.latitude;
-        let lng = pos.coords.longitude;
-
-        // ❗ अगर lat/lng invalid
-        if(!lat || !lng){
-            loader.style.display="none";
-            Swal.fire("Error","Location not detected","error");
-            return;
-        }
-
-        // ⭐ ADDRESS FETCH
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-        .then(res=>res.json())
-        .then(loc=>{
-
-            let address = loc.display_name;
-
-            // ❗ अगर address नहीं मिला → login रोक दो
-            if(!address){
-                loader.style.display="none";
-                Swal.fire("Error","Address not found, try again","error");
-                return;
-            }
-
-            // ✅ SAVE LOCATION (GLOBAL)
-            currentLat = lat;
-            currentLng = lng;
-            currentAddress = address;
-
-            // ⭐ LOGIN API CALL (ONLY NOW)
-            return fetch(apiUrl+"?action=login",{
-                method:"POST",
-                body:JSON.stringify({
-                    username:username.value,
-                    password:password.value,
-                    Latitude: lat,
-                    Longitude: lng,
-                    Address: address
-                })
-            });
-
+        fetch(apiUrl+"?action=login",{
+            method:"POST",
+            body:JSON.stringify({
+                username:username.value,
+                password:password.value,
+                Latitude: lat,
+                Longitude: lng,
+                Address: address
+            })
         })
         .then(res=>res.json())
         .then(res=>{
@@ -301,13 +263,19 @@ function login(){
                 chatid.value = res.chatId;
                 currentUser = res.name;
                 showUser.innerText = res.name;
-                userAddress = res.Address;   // ⭐ ADD THIS
-                filterDropdown();            // ⭐ ADD THIS
-                // ✅ SHOW LOCATION
-                locationText.innerHTML = "📍 " + currentAddress;
+                userAddress = res.Address;
+
+                filterDropdown();
+
+                // ✅ Location show (agar mila ho tab)
+                if(address){
+                    locationText.innerHTML = "📍 " + address;
+                }else{
+                    locationText.innerHTML = "📍 Location not available";
+                }
 
                 Swal.fire("Welcome", res.name, "success");
-               
+
             }else{
                 loginMsg.innerHTML="❌ Invalid Login";
             }
@@ -315,26 +283,44 @@ function login(){
         })
         .catch(err=>{
             loader.style.display="none";
-            Swal.fire("Error","Location fetch failed, try again","error");
+            Swal.fire("Error","Login failed","error");
+        });
+    }
+
+    // 👉 Check geolocation support
+    if (!navigator.geolocation) {
+        doLogin(); // बिना location login
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+    function(pos){
+
+        let lat = pos.coords.latitude;
+        let lng = pos.coords.longitude;
+
+        // 👉 Reverse geocoding (optional)
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+        .then(res=>res.json())
+        .then(loc=>{
+            let address = loc.display_name || "";
+            doLogin(lat, lng, address); // ✅ login anyway
+        })
+        .catch(()=>{
+            doLogin(lat, lng, ""); // address fail → login
         });
 
     },
 
     function(err){
-
-        loader.style.display="none";
-
-        Swal.fire({
-            title: "Location Required",
-            text: "Login ke liye Location ON karna zaroori hai",
-            icon: "error"
-        });
-
+        // ❗ location denied → login anyway
+        doLogin();
     },
 
     {
         enableHighAccuracy: true,
-        timeout: 10000
+        timeout: 8000
     }
 
     );
