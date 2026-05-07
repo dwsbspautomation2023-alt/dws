@@ -599,11 +599,15 @@ body:JSON.stringify([{
 .then(res=>{
     loader.style.display="none";
 
-    if(res.status==="blocked"){
-        Swal.fire("Late Over","Only 2 Late allowed","error");
+     if (res.status === "blocked") {
+     Swal.fire("Late Over","Only 2 Late allowed","error");
+    return;
+    }
+    
+    if (res.status === "Pblocked") {
+        Swal.fire("Already Punched", res.message || "❌ Already punched for Today", "warning");
         return;
     }
-
     Swal.fire("Saved!","Data submitted","success");
 
     type.value="";
