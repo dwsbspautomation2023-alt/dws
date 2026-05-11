@@ -385,17 +385,44 @@ function login(){
 
     },
 
-    function(err){
+   function(err){
 
-        loader.style.display="none";
+    loader.style.display="none";
+
+    // GPS OFF
+    if(err.code === 1){
 
         Swal.fire({
-            title: "Location Required",
-            text: "Login ke liye Location ON karna zaroori hai",
+            title: "Location Permission Denied",
+            text: "Please allow location access",
             icon: "error"
         });
 
-    },
+    }
+
+    // TIMEOUT
+    else if(err.code === 3){
+
+        Swal.fire({
+            title: "Location Timeout",
+            text: "GPS detect hone me time lag raha hai",
+            icon: "warning"
+        });
+
+    }
+
+    // OTHER
+    else{
+
+        Swal.fire({
+            title: "Location Error",
+            text: "Unable to fetch current location",
+            icon: "error"
+        });
+
+    }
+
+},
 
     {
         enableHighAccuracy: true,
@@ -936,14 +963,12 @@ window.onload = () => {
 
     let today = new Date().toISOString().split('T')[0];
 
-    // default dates
     fromdate.value = today;
     todate.value = today;
 
     r_from.value = today;
     r_to.value = today;
 
-    // ✅ RESET UI ON REFRESH
     loginBox.style.display = "flex";
     formBox.style.display = "none";
     reportBox.style.display = "none";
@@ -951,18 +976,60 @@ window.onload = () => {
     reportData.innerHTML = "";
     summary.innerHTML = "";
 
-    // reset user
     currentUser = "";
     empname.value = "";
     chatid.value = "";
     showUser.innerText = "";
+
     getLocation();
+
+    // ================= AUTO MIDNIGHT DATE CHANGE =================
+
+    let lastDate = new Date().toISOString().split('T')[0];
+
+    setInterval(() => {
+
+        let currentDate = new Date().toISOString().split('T')[0];
+
+        if(currentDate !== lastDate){
+
+            lastDate = currentDate;
+
+            fromdate.value = currentDate;
+            todate.value = currentDate;
+
+            r_from.value = currentDate;
+            r_to.value = currentDate;
+
+            console.log("Date auto updated");
+
+        }
+
+    }, 60000);
+
 };
 
 /* SERVICE WORKER */
 if ('serviceWorker' in navigator) {
 navigator.serviceWorker.register('sw.js');
 }
+
+// ================= AUTO DATE UPDATE =================
+setInterval(() => {
+
+    let now = new Date();
+
+    // current date
+    let today = now.toISOString().split('T')[0];
+
+    // update all date fields
+    fromdate.value = today;
+    todate.value = today;
+
+    r_from.value = today;
+    r_to.value = today;
+
+}, 60000); // every 1 minute
 
 </script>
 
