@@ -285,10 +285,6 @@ let apiUrl = "https://script.google.com/macros/s/AKfycbyXjTmIVt4CmKAh_KTx8ZDiQFs
 let currentUser = "";
 let userAddress = "";   // ⭐ ADD THIS
 
-window.addEventListener("load", function () {
-    let btn = document.getElementById("printBtn");
-    if (btn) btn.style.display = "none";
-});
 
 /* LOGIN */
 
@@ -425,8 +421,9 @@ function login(){
 },
 
     {
-        enableHighAccuracy: true,
-        timeout: 10000
+    enableHighAccuracy: true,
+    timeout: 5000,
+    maximumAge: 0
     }
 
     );
@@ -758,13 +755,6 @@ function formatDate(dt) {
     return `${day}-${month}-${year}`;
 }
 
-function getLeaveStatusText(s){
-    s = String(s).trim();
-
-    if(s === "1") return "Approved";
-    if(s === "2") return "Rejected";
-    return s
-}
 
 
 
