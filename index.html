@@ -396,29 +396,7 @@ function login(){
 
     }
 
-    // TIMEOUT
-    else if(err.code === 3){
-
-        Swal.fire({
-            title: "Location Timeout",
-            text: "GPS detect hone me time lag raha hai",
-            icon: "warning"
-        });
-
-    }
-
-    // OTHER
-    else{
-
-        Swal.fire({
-            title: "Location Error",
-            text: "Unable to fetch current location",
-            icon: "error"
-        });
-
-    }
-
-},
+   },
 
     {
     enableHighAccuracy: true,
