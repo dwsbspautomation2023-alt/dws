@@ -406,7 +406,7 @@ function login(){
     }
 
     );
-} 
+} // last
 
 type.addEventListener("change", function(){
 
@@ -566,55 +566,94 @@ function filterDropdown(){
 
 function submitFinal(){
 
-let from="", to="";
+let from = "";
+let to = "";
 
+// ✅ Today date
+let today = new Date().toISOString().split('T')[0];
+
+// ================= DATE LOGIC =================
+
+// Leave / Tour → selected date
 if(type.value === "Leave" || type.value === "Tour"){
+
     from = fromdate.value;
-    to = todate.value;
-}else{
-    from = todate.value;
     to = todate.value;
 }
 
-loader.style.display="flex";
+// HalfDay / Late → today date
+else if(type.value === "HalfDay" || type.value === "Late"){
+
+    from = today;
+    to = today;
+}
+
+// Present → backend date save
+else if(type.value === "Preset"){
+
+    from = "";
+    to = "";
+}
+
+loader.style.display = "flex";
 
 fetch(apiUrl,{
 method:"POST",
 body:JSON.stringify([{
-    EmpidName:empname.value,
-    ChatID:chatid.value,
-     // ⭐ FINAL LOGIC
+
+    EmpidName: empname.value,
+    ChatID: chatid.value,
+
     Type:
         (type.value === "Preset") ? "Present" :
         (userAddress === "S" && type.value === "Leave") ? "SLeave" :
         type.value,
-    Reason:reason.value,
-    FromDate:from,
-    ToDate:to,
 
-    // ⭐ LOCATION (HAR TYPE KE LIYE)
+    Reason: reason.value,
+
+    // ⭐ Present = blank
+    FromDate: from,
+    ToDate: to,
+
     Latitude: currentLat,
     Longitude: currentLng,
     Address: currentAddress
+
 }])
 })
-.then(res=>res.json())
-.then(res=>{
-    loader.style.display="none";
+.then(res => res.json())
+.then(res => {
 
-     if (res.status === "blocked") {
-     Swal.fire("Late Over","Only 2 Late allowed","error");
-    return;
-    }
-    
-    if (res.status === "Pblocked") {
-        Swal.fire("Already Punched", res.message || "❌ Already punched for Today", "warning");
+    loader.style.display = "none";
+
+    if(res.status === "blocked"){
+        Swal.fire(
+            "Late Over",
+            "Only 2 Late allowed",
+            "error"
+        );
         return;
     }
-    Swal.fire("Saved!","Data submitted","success");
 
-    type.value="";
-    reason.value="";
+    if(res.status === "Pblocked"){
+        Swal.fire(
+            "Already Punched",
+            res.message || "❌ Already punched for Today",
+            "warning"
+        );
+        return;
+    }
+
+    Swal.fire(
+        "Saved!",
+        "Data submitted",
+        "success"
+    );
+
+    // Reset
+    type.value = "";
+    reason.value = "";
+
 });
 }
 function getLocation(){
@@ -954,30 +993,7 @@ window.onload = () => {
 
     getLocation();
 
-    // ================= AUTO MIDNIGHT DATE CHANGE =================
-
-    let lastDate = new Date().toISOString().split('T')[0];
-
-    setInterval(() => {
-
-        let currentDate = new Date().toISOString().split('T')[0];
-
-        if(currentDate !== lastDate){
-
-            lastDate = currentDate;
-
-            fromdate.value = currentDate;
-            todate.value = currentDate;
-
-            r_from.value = currentDate;
-            r_to.value = currentDate;
-
-            console.log("Date auto updated");
-
-        }
-
-    }, 60000);
-
+   
 };
 
 /* SERVICE WORKER */
@@ -985,22 +1001,7 @@ if ('serviceWorker' in navigator) {
 navigator.serviceWorker.register('sw.js');
 }
 
-// ================= AUTO DATE UPDATE =================
-setInterval(() => {
 
-    let now = new Date();
-
-    // current date
-    let today = now.toISOString().split('T')[0];
-
-    // update all date fields
-    fromdate.value = today;
-    todate.value = today;
-
-    r_from.value = today;
-    r_to.value = today;
-
-}, 60000); // every 1 minute
 
 </script>
 
