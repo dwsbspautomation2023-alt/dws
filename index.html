@@ -295,118 +295,48 @@ function login(){
         return;
     }
 
-    if (!navigator.geolocation) {
-        Swal.fire("Error","Location not supported","error");
-        return;
-    }
+    loader.style.display = "flex";
 
-    loader.style.display="flex";
+    fetch(apiUrl + "?action=login", {
+        method: "POST",
+        body: JSON.stringify({
+            username: username.value,
+            password: password.value
+        })
+    })
+    .then(res => res.json())
+    .then(res => {
 
-    navigator.geolocation.getCurrentPosition(
+        loader.style.display = "none";
 
-    function(pos){
+        if(res.status === "success"){
 
-        let lat = pos.coords.latitude;
-        let lng = pos.coords.longitude;
+            loginBox.style.display = "none";
+            formBox.style.display = "flex";
 
-        // ❗ अगर lat/lng invalid
-        if(!lat || !lng){
-            loader.style.display="none";
-            Swal.fire("Error","Location not detected","error");
-            return;
+            empname.value = res.name;
+            chatid.value = res.chatId;
+            currentUser = res.name;
+            showUser.innerText = res.name;
+
+            userAddress = res.Address;
+            filterDropdown();
+
+            // Hide location text
+            locationText.innerHTML = "";
+
+            Swal.fire("Welcome", res.name, "success");
+
+        }else{
+            loginMsg.innerHTML = "❌ Invalid Login";
         }
 
-        // ⭐ ADDRESS FETCH
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-        .then(res=>res.json())
-        .then(loc=>{
-
-            let address = loc.display_name;
-
-            // ❗ अगर address नहीं मिला → login रोक दो
-            if(!address){
-                loader.style.display="none";
-                Swal.fire("Error","Address not found, try again","error");
-                return;
-            }
-
-            // ✅ SAVE LOCATION (GLOBAL)
-            currentLat = lat;
-            currentLng = lng;
-            currentAddress = address;
-
-            // ⭐ LOGIN API CALL (ONLY NOW)
-            return fetch(apiUrl+"?action=login",{
-                method:"POST",
-                body:JSON.stringify({
-                    username:username.value,
-                    password:password.value,
-                    Latitude: lat,
-                    Longitude: lng,
-                    Address: address
-                })
-            });
-
-        })
-        .then(res=>res.json())
-        .then(res=>{
-
-            loader.style.display="none";
-
-            if(res.status==="success"){
-
-                loginBox.style.display="none";
-                formBox.style.display="flex";
-
-                empname.value = res.name;
-                chatid.value = res.chatId;
-                currentUser = res.name;
-                showUser.innerText = res.name;
-                userAddress = res.Address;   // ⭐ ADD THIS
-                filterDropdown();            // ⭐ ADD THIS
-                // ✅ SHOW LOCATION
-                locationText.innerHTML = "📍 " + currentAddress;
-
-                Swal.fire("Welcome", res.name, "success");
-               
-            }else{
-                loginMsg.innerHTML="❌ Invalid Login";
-            }
-
-        })
-        .catch(err=>{
-            loader.style.display="none";
-            Swal.fire("Error","Location fetch failed, try again","error");
-        });
-
-    },
-
-   function(err){
-
-    loader.style.display="none";
-
-    // GPS OFF
-    if(err.code === 1){
-
-        Swal.fire({
-            title: "Location Permission Denied",
-            text: "Please allow location access",
-            icon: "error"
-        });
-
-    }
-
-   },
-
-    {
-    enableHighAccuracy: true,
-    timeout: 10000
-    ,
-    maximumAge: 0
-    }
-
-    );
-} // last
+    })
+    .catch(err => {
+        loader.style.display = "none";
+        Swal.fire("Error","Login failed","error");
+    });
+}
 
 type.addEventListener("change", function(){
 
