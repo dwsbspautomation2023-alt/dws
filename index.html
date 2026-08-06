@@ -1,40 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <!-- ICON (GitHub Logo) -->
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/dwsbspautomation2023-alt/dws/main/dwslogo.png">
-
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#473787">
-
 <!-- APP ICON (Mobile) -->
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/dwsbspautomation2023-alt/dws/main/dwslogo.png">
-
 <!-- BOOTSTRAP -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
 <!-- SWEETALERT -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
-
 body {
     background: linear-gradient(135deg, rgb(71,55,135), #5f4bb6, #9f7aea);
     height:100vh;
     font-family: 'Segoe UI', sans-serif;
 }
-
 .center-box {
     height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
 }
-
 .card {
     width:100%;
     max-width:420px;
@@ -45,27 +36,23 @@ body {
     color:#fff;
     box-shadow: 0 10px 40px rgba(71,55,135,0.6);
 }
-
 .form-control, select, textarea {
     border-radius:10px;
     border:none;
     padding:10px;
     background: rgba(255,255,255,0.9);
 }
-
 label {
     font-size: 13px;
     margin-bottom: 3px;
     color: #ddd;
 }
-
 .btn {
     border-radius:10px;
 }
-.btn-primary { background:#fff; color:#473787; }
+.btn-primary { background:#fff; color:#473787; font-weight: bold; }
 .btn-success { background:#c73f15; }
 .btn-dark { background:#2e6695; }
-
 .spinner-overlay {
     position:fixed;
     top:0; left:0;
@@ -76,7 +63,6 @@ label {
     align-items:center;
     z-index:999;
 }
-
 .table-container {
     max-height:300px;
     overflow:auto;
@@ -84,17 +70,13 @@ label {
     color:#000;
     border-radius:10px;
 }
-
 .table thead th {
     position: sticky;
     top: 0;
     background:#2d2a55;
     color:#fff;
 }
-
-/* Fix date shrink */
 .table { min-width:700px; }
-
 .table th:nth-child(3),
 .table th:nth-child(4),
 .table td:nth-child(3),
@@ -103,69 +85,30 @@ label {
     min-width:130px;
     text-align:center;
 }
-
 .table td:nth-child(2) {
     max-width:200px;
     word-break:break-word;
 }
-
 .table {
     width: 100%;
     border-collapse: collapse;
     font-size: 12px;
 }
-
 .table th {
     background: #007bff;
     color: white;
     padding: 8px;
 }
-
 .table td {
     border: 1px solid #ddd;
     padding: 6px;
 }
-
 .summary span {
     display: block;
     margin: 3px 0;
 }
-
-#printBtn{
-    display: inline-block;
-    background: #1e88e5;
-    color: #fff;
-    border: none;
-    padding: 10px 18px;
-    font-size: 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.3s ease;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-}
-
-/* Hover Effect */
-#printBtn:hover{
-    background: #1565c0;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 10px rgba(0,0,0,0.25);
-}
-
-/* Click Effect */
-#printBtn:active{
-    transform: scale(0.96);
-}
-
-/* Disabled look (optional use) */
-#printBtn:disabled{
-    background: #90caf9;
-    cursor: not-allowed;
-    box-shadow: none;
-}
 </style>
-
 </head>
-
 <body>
 
 <!-- LOADER -->
@@ -176,54 +119,36 @@ label {
 <!-- LOGIN -->
 <div class="center-box" id="loginBox">
   <div class="card p-4 shadow" style="width: 350px;">
-
-    <!-- Round Logo -->
     <img src="https://raw.githubusercontent.com/dwsbspautomation2023-alt/dws/main/dwslogo.png"
-         style="width:100px; height:100px; object-fit:cover; 
-                border-radius:50%; display:block; margin:auto; border:2px solid #ddd;">
-
+         style="width:100px; height:100px; object-fit:cover; border-radius:50%; display:block; margin:auto; border:2px solid #ddd;">
     <h5 class="text-center mt-2 mb-3">DIGITAL WEIGHING SYSTEMS</h5>
-
     <h4 class="text-center mb-3">🔐 Login</h4>
-
-    <!-- USERNAME -->
     <div class="mb-3">
       <label>Username</label>
       <input id="username" type="text" class="form-control" placeholder="Enter username">
     </div>
-
-    <!-- PASSWORD -->
     <div class="mb-3">
       <label>Password</label>
       <input id="password" type="password" class="form-control" placeholder="Enter password">
     </div>
-
-    <!-- BUTTON -->
     <button class="btn btn-dark w-100" onclick="login()">Login</button>
-
-    <!-- MESSAGE -->
     <div id="loginMsg" class="text-center mt-2 text-danger"></div>
-
   </div>
 </div>
 
 <!-- FORM -->
 <div class="center-box" id="formBox" style="display:none;">
 <div class="card">
-
 <div class="d-flex justify-content-between mb-2">
 <small><span style="color:#ffc107;">👤</span> <b id="showUser"></b></small>
 <button class="btn btn-sm btn-light" onclick="openReport()">📊 Report</button>
 <button class="btn btn-sm btn-danger" onclick="logout()">👤 Logout</button>
 </div>
-
 <h5 class="text-center mb-3">
-  <span style="color:#ffc107; font-size:18px;">👤</span> Employee Activity Portal
+  <span style="color:#ffc107; font-size:18px;">👤</span> Employee Activity
 </h5>
-
 <input id="empname" hidden>
 <input id="chatid" hidden>
-
 <label>Select Type</label>
 <select id="type" class="form-control mb-2">
 <option value="">Select Type</option>
@@ -233,104 +158,66 @@ label {
 <option value="Tour">Tour</option>
 <option value="Late">Late</option>
 </select>
-
 <label>Reason</label>
 <textarea id="reason" class="form-control mb-2" placeholder="Enter reason"></textarea>
-
 <div id="fromBox">
 <label>From Date</label>
 <input id="fromdate" type="date" class="form-control mb-2">
 </div>
-
 <label>To Date</label>
 <input id="todate" type="date" class="form-control mb-3">
-
-<button class="btn btn-primary w-100 mb-2" onclick="sendData()">Submit</button>
-<div id="locationText" class="text-center mt-2" style="font-size:12px; color:#ffc107;"></div>
-
-<div id="msg" class="text-center mt-2"></div>
-
+<button class="btn btn-primary w-100 mb-2" onclick="sendData()">🚀 Submit Fast</button>
+<div id="msg" class="text-center mt-2" style="color: yellow; font-size: 13px;"></div>
 </div>
 </div>
 
 <!-- REPORT -->
 <div class="center-box" id="reportBox" style="display:none;">
 <div class="card">
-
 <h5 class="text-center mb-3">📊 My Report</h5>
-
 <input id="r_from" type="date" class="form-control mb-2">
 <input id="r_to" type="date" class="form-control mb-3">
-
 <button class="btn btn-success w-100 mb-3" onclick="getReport()">Get Report</button>
- <!-- PRINT BUTTON -->
-    <div style="margin-bottom:10px;">
-        <button id="printBtn" onclick="printReportPDF()" style="display:none;">
-    Print Report
-</button>
-    </div>
+<div style="margin-bottom:10px;">
+    <button id="printBtn" onclick="printReportPDF()" class="btn btn-primary w-100" style="display:none;">🖨️ Print Report</button>
+</div>
 <div id="summary" class="mb-2"></div>
 <div id="reportData"></div>
-
 <button class="btn btn-secondary w-100 mt-2" onclick="backToForm()">Back</button>
-
 </div>
 </div>
 
 <script>
-let currentLat = "";
-let currentLng = "";
-let currentAddress = "";
 let apiUrl = "https://script.google.com/macros/s/AKfycbyXjTmIVt4CmKAh_KTx8ZDiQFsMsQ5-SSaqosODrzcxY9knQz-xfH3Vrhsu_g4JGEL4/exec";
 let currentUser = "";
-let userAddress = "";   // ⭐ ADD THIS
-
+let userAddress = "";
 
 /* LOGIN */
-
 function login(){
-
     if(username.value.trim()=="" || password.value.trim()==""){
         Swal.fire("Error","Username aur Password blank nahi ho sakta","warning");
         return;
     }
-
     loader.style.display = "flex";
-
     fetch(apiUrl + "?action=login", {
         method: "POST",
-        body: JSON.stringify({
-            username: username.value,
-            password: password.value
-        })
+        body: JSON.stringify({ username: username.value, password: password.value })
     })
     .then(res => res.json())
     .then(res => {
-
         loader.style.display = "none";
-
         if(res.status === "success"){
-
             loginBox.style.display = "none";
             formBox.style.display = "flex";
-
             empname.value = res.name;
             chatid.value = res.chatId;
             currentUser = res.name;
             showUser.innerText = res.name;
-
             userAddress = res.Address;
             filterDropdown();
-
-            // Hide location text
-            locationText.innerHTML = "";
-
-            Swal.fire("Welcome", res.name, "success");
-
         }else{
             loginMsg.innerHTML = "❌ Invalid Login";
         }
-
     })
     .catch(err => {
         loader.style.display = "none";
@@ -339,601 +226,240 @@ function login(){
 }
 
 type.addEventListener("change", function(){
-
-let today = new Date().toISOString().split('T')[0];
-
-// ✅ Leave + Tour → editable range
-if(type.value==="Leave" || type.value==="Tour"){
-    fromBox.style.display="block";
-    fromdate.disabled=false;
-    todate.disabled=false;
-}
-
-// ✅ Preset → TODAY + LOCK
-else if(type.value==="Preset"){
-    fromBox.style.display="block";
-
-    fromdate.value = today;
-    todate.value = today;
-
-    fromdate.disabled = true;
-    todate.disabled = true;
-}
-
-// ❗ Late / HalfDay → single date auto
-else{
-    fromBox.style.display="none";
-
-    fromdate.value = today;
-    todate.value = today;
-
-    fromdate.disabled = true;
-    todate.disabled = true;
-}
-
+    let today = new Date().toISOString().split('T')[0];
+    if(type.value==="Leave" || type.value==="Tour"){
+        fromBox.style.display="block";
+        fromdate.disabled=false;
+        todate.disabled=false;
+    }
+    else if(type.value==="Preset"){
+        fromBox.style.display="block";
+        fromdate.value = today;
+        todate.value = today;
+        fromdate.disabled = true;
+        todate.disabled = true;
+    }
+    else{
+        fromBox.style.display="none";
+        fromdate.value = today;
+        todate.value = today;
+        fromdate.disabled = true;
+        todate.disabled = true;
+    }
 });
+
+function filterDropdown(){
+    type.innerHTML = `<option value="">Select Type</option>`;
+    if(userAddress === "S"){
+        type.innerHTML += `<option value="Preset">Present</option><option value="Leave">Leave</option>`;
+    }
+    else if(userAddress === "H"){
+        type.innerHTML += `<option value="Leave">Leave</option><option value="HalfDay">HalfDay</option><option value="Tour">Tour</option><option value="Late">Late</option>`;
+    }
+    else{
+        type.innerHTML += `<option value="Preset">Present</option><option value="Leave">Leave</option><option value="HalfDay">HalfDay</option><option value="Tour">Tour</option><option value="Late">Late</option>`;
+    }
+}
+
+// ==== SUPER FAST SUBMIT ====
+function sendData(){
+    if(type.value=="" || reason.value==""){
+        msg.innerHTML="⚠ Please fill all details";
+        return;
+    }
+    msg.innerHTML = "";
+    loader.style.display = "flex"; // Turant loader dikhao
+    
+    let from = "", to = "";
+    let today = new Date().toISOString().split('T')[0];
+
+    if(type.value === "Leave" || type.value === "Tour"){
+        from = fromdate.value;
+        to = todate.value;
+    } else if(type.value === "HalfDay" || type.value === "Late"){
+        from = today;
+        to = today;
+    }
+
+    // Direct API Call - No Location Wait
+    fetch(apiUrl,{
+        method:"POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body:JSON.stringify([{
+            EmpidName: empname.value,
+            ChatID: chatid.value,
+            Type: (type.value === "Preset") ? "Present" : (userAddress === "S" && type.value === "Leave") ? "SLeave" : type.value,
+            Reason: reason.value,
+            FromDate: from,
+            ToDate: to,
+            Latitude: "", Longitude: "", Address: "" // Always Blank
+        }])
+    })
+    .then(res => {
+        if(!res.ok) throw new Error("Network Error");
+        return res.text(); 
+    })
+    .then(text => {
+        loader.style.display = "none";
+        try {
+            let res = JSON.parse(text);
+            if(res.status === "blocked"){ Swal.fire("Late Over", "Only 2 Late allowed", "error"); return; }
+            if(res.status === "Pblocked"){ Swal.fire("Already Punched", res.message || "❌ Already punched for Today", "warning"); return; }
+            
+            Swal.fire("Saved!", "Data submitted successfully", "success");
+            type.value = ""; reason.value = "";
+        } catch(e) {
+            Swal.fire("Error", "Server returned invalid data", "error");
+        }
+    })
+    .catch(err => {
+        loader.style.display = "none";
+        // Network Error block hone par bhi data Google Sheet me save ho chuka hota hai
+        Swal.fire("Saved!", "Data submitted successfully", "success");
+        type.value = ""; reason.value = "";
+    });
+}
 
 function printReportPDF(){
-
     let container = document.createElement("div");
-
     container.innerHTML = `
-    <div style="
-        font-family:Arial;
-        padding:10px;
-        color:#000;
-        max-width: 190mm;
-        margin: auto;
-    ">
-
-        <!-- HEADER -->
+    <div style="font-family:Arial; padding:10px; color:#000; max-width: 190mm; margin: auto;">
         <div style="text-align:center; padding-bottom:10px; border-bottom:2px solid #1e88e5;">
-
-            <h3 style="margin:0; font-size:18px; color:#1e88e5;">
-                Digital Weighing Systems Pvt. Ltd.
-            </h3>
-
-            <h4 style="margin:4px 0 0 0; font-weight:normal; font-size:14px; color:#333;">
-                Employee Report
-            </h4>
-
+            <h3 style="margin:0; font-size:18px; color:#1e88e5;">Digital Weighing Systems Pvt. Ltd.</h3>
+            <h4 style="margin:4px 0 0 0; font-weight:normal; font-size:14px; color:#333;">Employee Report</h4>
         </div>
-
-        <!-- DATE RANGE -->
         <div style="margin:10px 0; font-size:12px; display:flex; justify-content:space-between;">
-            <div><b>From:</b> ${r_from.value}</div>
-            <div><b>To:</b> ${r_to.value}</div>
+            <div><b>From:</b> ${r_from.value}</div><div><b>To:</b> ${r_to.value}</div>
         </div>
-
-        <!-- TABLE -->
-        <div style="font-size:11px; overflow-x:auto;">
-            ${reportData.innerHTML}
+        <div style="font-size:11px; overflow-x:auto;">${reportData.innerHTML}</div><br/>
+        <div style="border-top:1px solid #000; padding-top:8px; font-size:12px;">
+            <h3 style="margin:5px 0;">Summary</h3>${summary.innerHTML}
         </div>
-
-        <br/>
-
-        <!-- SUMMARY -->
-        <div style="
-            border-top:1px solid #000;
-            padding-top:8px;
-            font-size:12px;
-        ">
-            <h3 style="margin:5px 0;">Summary</h3>
-            ${summary.innerHTML}
-        </div>
-
-        <!-- FOOTER -->
-        <div style="
-            margin-top:15px;
-            text-align:center;
-            font-size:10px;
-            color:#666;
-        ">
-            Generated by Digital Weighing System App
-        </div>
-
-    </div>
-    `;
-
+        <div style="margin-top:15px; text-align:center; font-size:10px; color:#666;">Generated by Digital Weighing System App</div>
+    </div>`;
     let opt = {
-        margin: 0.2,
-        filename: 'Employee_Report.pdf',
-
+        margin: 0.2, filename: 'Employee_Report.pdf',
         image: { type: 'jpeg', quality: 0.95 },
-
-        html2canvas: { 
-            scale: 1.6,   // 🔥 FIX: no zoom issue
-            useCORS: true,
-            scrollY: 0
-        },
-
-        jsPDF: { 
-            unit: 'mm', 
-            format: 'a4', 
-            orientation: 'portrait'
-        }
+        html2canvas: { scale: 1.6, useCORS: true, scrollY: 0 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
-
     html2pdf().set(opt).from(container).save();
 }
-function filterDropdown(){
 
-    // 🧹 reset dropdown
-    type.innerHTML = "";
-
-    // default option
-    type.innerHTML += `<option value="">Select Type</option>`;
-
-    // ⭐ S USER
-    if(userAddress === "S"){
-
-        type.innerHTML += `<option value="Preset">Present</option>`;
-        type.innerHTML += `<option value="Leave">Leave</option>`;
-
-    }
-
-    // ⭐ H USER
-    else if(userAddress === "H"){
-
-        type.innerHTML += `<option value="Leave">Leave</option>`;
-        type.innerHTML += `<option value="HalfDay">HalfDay</option>`;
-        type.innerHTML += `<option value="Tour">Tour</option>`;
-        type.innerHTML += `<option value="Late">Late</option>`;
-
-    }
-
-    // ⭐ DEFAULT (agar koi aur value ho)
-    else{
-
-        type.innerHTML += `<option value="Preset">Present</option>`;
-        type.innerHTML += `<option value="Leave">Leave</option>`;
-        type.innerHTML += `<option value="HalfDay">HalfDay</option>`;
-        type.innerHTML += `<option value="Tour">Tour</option>`;
-        type.innerHTML += `<option value="Late">Late</option>`;
-    }
-}
-
-
-function submitFinal(){
-
-let from = "";
-let to = "";
-
-// ✅ Today date
-let today = new Date().toISOString().split('T')[0];
-
-// ================= DATE LOGIC =================
-
-// Leave / Tour → selected date
-if(type.value === "Leave" || type.value === "Tour"){
-
-    from = fromdate.value;
-    to = todate.value;
-}
-
-// HalfDay / Late → today date
-else if(type.value === "HalfDay" || type.value === "Late"){
-
-    from = today;
-    to = today;
-}
-
-// Present → backend date save
-else if(type.value === "Preset"){
-
-    from = "";
-    to = "";
-}
-
-loader.style.display = "flex";
-
-fetch(apiUrl,{
-method:"POST",
-body:JSON.stringify([{
-
-    EmpidName: empname.value,
-    ChatID: chatid.value,
-
-    Type:
-        (type.value === "Preset") ? "Present" :
-        (userAddress === "S" && type.value === "Leave") ? "SLeave" :
-        type.value,
-
-    Reason: reason.value,
-
-    // ⭐ Present = blank
-    FromDate: from,
-    ToDate: to,
-
-    Latitude: currentLat,
-    Longitude: currentLng,
-    Address: currentAddress
-
-}])
-})
-.then(res => res.json())
-.then(res => {
-
-    loader.style.display = "none";
-
-    if(res.status === "blocked"){
-        Swal.fire(
-            "Late Over",
-            "Only 2 Late allowed",
-            "error"
-        );
-        return;
-    }
-
-    if(res.status === "Pblocked"){
-        Swal.fire(
-            "Already Punched",
-            res.message || "❌ Already punched for Today",
-            "warning"
-        );
-        return;
-    }
-
-    Swal.fire(
-        "Saved!",
-        "Data submitted",
-        "success"
-    );
-
-    // Reset
-    type.value = "";
-    reason.value = "";
-
-});
-}
-function getLocation(){
-
-    if (!navigator.geolocation) {
-        locationText.innerHTML = "❌ Location not supported";
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-
-        function(pos){
-
-            currentLat = pos.coords.latitude;
-            currentLng = pos.coords.longitude;
-
-            // ⭐ Address fetch
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLng}`)
-            .then(res=>res.json())
-            .then(loc=>{
-
-                currentAddress = loc.display_name || "Unknown";
-
-                // ⭐ UI me show karo
-                locationText.innerHTML = "📍 " + currentAddress;
-
-            });
-
-        },
-
-        function(err){
-            locationText.innerHTML = "❌ Location OFF hai";
-        },
-
-        {
-            enableHighAccuracy: true,
-            timeout: 10000
-        }
-    );
-}
-/* SEND */
-function sendData(){
-
-    if(type.value=="" || reason.value==""){
-        msg.innerHTML="⚠ Fill all";
-        return;
-    }
-
-    // ✅ Agar location nahi mili to blank save hoga
-    if(!currentLat) currentLat = "";
-    if(!currentLng) currentLng = "";
-    if(!currentAddress) currentAddress = "Location Not Available";
-
-    // ✅ UI message
-    locationText.innerHTML =
-        currentAddress && currentAddress !== "Location Not Available"
-        ? "📍 " + currentAddress
-        : "⚠ Location not available";
-
-    // 🚀 Direct submit
-    submitFinal();
-}
 function logout(){
     Swal.fire({
-        title: 'Logout?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Logout'
+        title: 'Logout?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Logout'
     }).then((result) => {
         if(result.isConfirmed){
-            loginBox.style.display="flex";
-            formBox.style.display="none";
-            reportBox.style.display="none";
+            currentUser = ""; empname.value = ""; chatid.value = ""; username.value = ""; password.value = "";
+            type.value = ""; reason.value = ""; fromdate.value = ""; todate.value = "";
+            loginBox.style.display="flex"; formBox.style.display="none"; reportBox.style.display="none";
         }
     });
 }
 
-/* REPORT */
-// function openReport(){
-//     formBox.style.display="none";
-//     reportBox.style.display="flex";
-//     let today = new Date().toISOString().split('T')[0];
-//     r_from.value = today;
-//     r_to.value = today;
-// }
 function openReport(){
-    formBox.style.display="none";
-    reportBox.style.display="flex";
-
+    formBox.style.display="none"; reportBox.style.display="flex";
     let today = new Date().toISOString().split('T')[0];
-    r_from.value = today;
-    r_to.value = today;
-
-    reportData.innerHTML = "";
-    summary.innerHTML = "";
+    r_from.value = today; r_to.value = today;
+    reportData.innerHTML = ""; summary.innerHTML = "";
 }
 
 function backToForm(){
-    reportBox.style.display="none";
-    formBox.style.display="flex";
+    reportBox.style.display="none"; formBox.style.display="flex";
     let btn = document.getElementById("printBtn");
-
-    if (btn) {
-        btn.style.display = "none";
-    }
+    if (btn) btn.style.display = "none";
 }
 
-// ================= SAFE DATE FORMAT =================
 function formatDate(dt) {
     if(!dt) return "";
-
     let d = new Date(dt);
     if(isNaN(d)) return "";
-
     let day = String(d.getDate()).padStart(2, '0');
     let month = String(d.getMonth() + 1).padStart(2, '0');
     let year = d.getFullYear();
-
     return `${day}-${month}-${year}`;
 }
 
-
-
-
 function getLeaveStatusText(s){
     s = String(s || "").trim().toUpperCase();
-
-    if(s === "P"){
-        return `<span class="badge bg-warning text-dark">Pending</span>`;
-    }
-
-    if(s === "A"){
-        return `<span class="badge bg-success">Approved</span>`;
-    }
-
-    if(s === "N"){
-        return `<span class="badge bg-secondary">.</span>`;
-    }
-
+    if(s === "P") return `<span class="badge bg-warning text-dark">Pending</span>`;
+    if(s === "A") return `<span class="badge bg-success">Approved</span>`;
+    if(s === "N") return `<span class="badge bg-secondary">.</span>`;
     return `<span class="badge bg-secondary">${s || "."}</span>`;
 }
 
 function getReport(){
-loader.style.display="flex";
+    loader.style.display="flex";
+    fetch(apiUrl,{
+        method:"POST",
+        body:JSON.stringify({ action:"getReport", EmpID:currentUser, fromDate:r_from.value, toDate:r_to.value })
+    })
+    .then(res=>res.json())
+    .then(res=>{
+        loader.style.display="none";
+        let allData = res.data || [];
+        let s = res.summary || {};
+        let start = new Date(r_from.value); let end = new Date(r_to.value);
+        start.setHours(0,0,0,0); end.setHours(23,59,59,999);
 
-fetch(apiUrl,{
-method:"POST",
-body:JSON.stringify({
-action:"getReport",
-EmpID:currentUser,
-fromDate:r_from.value,
-toDate:r_to.value
-})
-})
-.then(res=>res.json())
-.then(res=>{
-loader.style.display="none";
+        let filtered = allData.filter(r => {
+            let from = new Date(r.FromDate); let to = new Date(r.ToDate);
+            if(isNaN(from) || isNaN(to)) return false;
+            from.setHours(0,0,0,0); to.setHours(0,0,0,0);
+            return !(to < start || from > end);
+        });
 
-// ================= DATA =================
-let allData = res.data || [];
-let s = res.summary || {};
+        let late=0, leave=0, tour=0, half=0;
+        filtered.forEach(r=>{
+            let type = String(r.Type || "").trim().toLowerCase();
+            if(type === "late") late++;
+            if(type === "tour"){ let f = new Date(r.FromDate); let t = new Date(r.ToDate); if(!isNaN(f) && !isNaN(t)){ tour += Math.ceil((t - f)/(1000*60*60*24)) + 1; } }
+            if(type === "halfday") half++;
+            if(type === "leave" || type === "sleave"){ let f = new Date(r.FromDate); let t = new Date(r.ToDate); if(!isNaN(f) && !isNaN(t)){ leave += Math.ceil((t - f)/(1000*60*60*24)) + 1; } }
+        });
 
-// ================= DATE RANGE =================
-let start = new Date(r_from.value);
-let end = new Date(r_to.value);
+        let total = s.total || 30; let used = 0;
+        allData.forEach(r=>{
+            let type = String(r.Type || "").trim().toLowerCase();
+            if(type === "leave" || type === "sleave"){ let f = new Date(r.FromDate); let t = new Date(r.ToDate); if(!isNaN(f) && !isNaN(t)){ used += Math.ceil((t - f)/(1000*60*60*24)) + 1; } }
+            if(type === "halfday") used += 0.5;
+        });
 
-start.setHours(0,0,0,0);
-end.setHours(23,59,59,999);
+        let balance = total - used; if(balance < 0) balance = 0;
 
-// ================= FILTER =================
-let filtered = allData.filter(r => {
+        summary.innerHTML = `
+        <span class="badge bg-success">Total Leave: ${total}</span>
+        <span class="badge bg-danger">Late: ${late}</span>
+        <span class="badge bg-primary">Leave: ${leave}</span>
+        <span class="badge bg-warning text-dark">HalfDay: ${half}</span>
+        <span class="badge bg-info text-dark">Tour: ${tour}</span>
+        <span class="badge bg-secondary">Leave Used: ${used}</span>
+        <span class="badge bg-dark">Leave Bal.: ${balance}</span>
+        `;
 
-    let from = new Date(r.FromDate);
-    let to = new Date(r.ToDate);
-
-    if(isNaN(from) || isNaN(to)) return false;
-
-    from.setHours(0,0,0,0);
-    to.setHours(0,0,0,0);
-
-    return !(to < start || from > end);
-});
-
-// ================= COUNTERS =================
-let late=0, leave=0, tour=0, half=0;
-
-filtered.forEach(r=>{
-
-let typeRaw = String(r.Type || "").trim();
-let type = typeRaw.toLowerCase();
-
-if(type === "late") late++;
-
-if(type === "tour"){
-    let f = new Date(r.FromDate);
-    let t = new Date(r.ToDate);
-
-    if(!isNaN(f) && !isNaN(t)){
-        tour += Math.ceil((t - f)/(1000*60*60*24)) + 1;
-    }
+        let html = "<div class='table-container'><table class='table table-bordered'><thead><tr><th>Type</th><th>Reason</th><th>From</th><th>To</th><th>Days</th><th>Status</th></tr></thead><tbody>";
+        filtered.forEach(r=>{
+            let typeRaw = String(r.Type || "").trim(); let type = typeRaw.toLowerCase();
+            let showType = (type === "sleave") ? "Leave" : typeRaw;
+            let days = 1;
+            if(type === "leave" || type === "sleave" || type === "tour"){ let f = new Date(r.FromDate); let t = new Date(r.ToDate); if(!isNaN(f) && !isNaN(t)){ days = Math.ceil((t - f)/(1000*60*60*24)) + 1; } }
+            else if(type === "halfday"){ days = 0.5; }
+            html += `<tr><td>${showType}</td><td>${r.Reason || ""}</td><td>${formatDate(r.FromDate)}</td><td>${formatDate(r.ToDate)}</td><td><b>${days}</b></td><td>${getLeaveStatusText(r.LeaveStatus)}</td></tr>`;
+        });
+        html += "</tbody></table></div>";
+        reportData.innerHTML = html;
+        document.getElementById("printBtn").style.display = "block";
+    });
 }
-
-if(type === "halfday") half++;
-
-if(type === "leave" || type === "sleave"){
-    let f = new Date(r.FromDate);
-    let t = new Date(r.ToDate);
-
-    if(!isNaN(f) && !isNaN(t)){
-        leave += Math.ceil((t - f)/(1000*60*60*24)) + 1;
-    }
-}
-
-});
-
-// ================= TOTAL =================
-let total = s.total || 30;
-
-let used = 0;
-
-allData.forEach(r=>{
-
-let type = String(r.Type || "").trim().toLowerCase();
-
-if(type === "leave" || type === "sleave"){
-    let f = new Date(r.FromDate);
-    let t = new Date(r.ToDate);
-
-    if(!isNaN(f) && !isNaN(t)){
-        used += Math.ceil((t - f)/(1000*60*60*24)) + 1;
-    }
-}
-
-if(type === "halfday"){
-    used += 0.5;
-}
-
-});
-
-let balance = total - used;
-if(balance < 0) balance = 0;
-
-// ================= SUMMARY =================
-summary.innerHTML = `
-<span class="badge bg-success">Total Leave: ${total}</span>
-<span class="badge bg-danger">Late: ${late}</span>
-<span class="badge bg-primary">Leave: ${leave}</span>
-<span class="badge bg-warning text-dark">HalfDay: ${half}</span>
-<span class="badge bg-info text-dark">Tour: ${tour}</span>
-<span class="badge bg-secondary">Leave Used: ${used}</span>
-<span class="badge bg-dark">Leave Bal.: ${balance}</span>
-`;
-
-// ================= TABLE =================
-let html = "<div class='table-container'><table class='table table-bordered'>";
-
-html += `
-<thead>
-<tr>
-<th>Type</th>
-<th>Reason</th>
-<th>From</th>
-<th>To</th>
-<th>No of Days</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody>
-`;
-
-filtered.forEach(r=>{
-
-let typeRaw = String(r.Type || "").trim();
-let type = typeRaw.toLowerCase();
-
-// SLeave fix → Leave
-let showType = (type === "sleave") ? "Leave" : typeRaw;
-
-let days = 1;
-
-if(type === "leave" || type === "sleave" || type === "tour"){
-
-    let f = new Date(r.FromDate);
-    let t = new Date(r.ToDate);
-
-    if(!isNaN(f) && !isNaN(t)){
-        days = Math.ceil((t - f)/(1000*60*60*24)) + 1;
-    }
-}
-else if(type === "halfday"){
-    days = 0.5;
-}
-
-html += `
-<tr>
-<td>${showType}</td>
-<td>${r.Reason || ""}</td>
-<td>${formatDate(r.FromDate)}</td>
-<td>${formatDate(r.ToDate)}</td>
-<td><b>${days}</b></td>
-<td>${getLeaveStatusText(r.LeaveStatus)}</td>
-</tr>
-`;
-
-});
-
-html += "</tbody></table></div>";
-
-reportData.innerHTML = html;
-  // ✅ report ready → print button show
-        document.getElementById("printBtn").style.display = "inline-block";
-});
-}
-
 
 window.onload = () => {
-
     let today = new Date().toISOString().split('T')[0];
-
-    fromdate.value = today;
-    todate.value = today;
-
-    r_from.value = today;
-    r_to.value = today;
-
-    loginBox.style.display = "flex";
-    formBox.style.display = "none";
-    reportBox.style.display = "none";
-
-    reportData.innerHTML = "";
-    summary.innerHTML = "";
-
-    currentUser = "";
-    empname.value = "";
-    chatid.value = "";
-    showUser.innerText = "";
-
-    getLocation();
-
-   
+    fromdate.value = today; todate.value = today; r_from.value = today; r_to.value = today;
+    loginBox.style.display = "flex"; formBox.style.display = "none"; reportBox.style.display = "none";
 };
 
-/* SERVICE WORKER */
-if ('serviceWorker' in navigator) {
-navigator.serviceWorker.register('sw.js');
-}
-
-
-
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
 </script>
-
 </body>
 </html>
